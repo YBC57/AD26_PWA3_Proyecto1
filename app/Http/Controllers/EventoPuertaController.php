@@ -26,8 +26,8 @@ class EventoPuertaController extends Controller
                 'vibracion_detectada' => $evento->vibracion_detectada,
                 'cantidad_vibracion' => $evento->cantidad_vibracion,
                 'tipo_evento' => $evento->tipo_evento,
-                'detectado_en' => $evento->detectado_en?->toISOString(),
-                'created_at' => $evento->created_at?->toISOString(),
+                'detectado_en' => $evento->detectado_en->toISOString(),
+                'created_at' => $evento->created_at->toISOString(),
             ]);
 
         return Inertia::render('Dashboard', [
@@ -49,8 +49,8 @@ class EventoPuertaController extends Controller
                 'vibracion_detectada' => $eventoPuerta->vibracion_detectada,
                 'cantidad_vibracion' => $eventoPuerta->cantidad_vibracion,
                 'tipo_evento' => $eventoPuerta->tipo_evento,
-                'detectado_en' => $eventoPuerta->detectado_en?->toISOString(),
-                'created_at' => $eventoPuerta->created_at?->toISOString(),
+                'detectado_en' => $eventoPuerta->detectado_en->toISOString(),
+                'created_at' => $eventoPuerta->created_at->toISOString(),
             ],
             'eventos' => EventoPuerta::query()
                 ->orderByDesc('detectado_en')
@@ -63,7 +63,7 @@ class EventoPuertaController extends Controller
                     'vibracion_detectada' => $evento->vibracion_detectada,
                     'cantidad_vibracion' => $evento->cantidad_vibracion,
                     'tipo_evento' => $evento->tipo_evento,
-                    'detectado_en' => $evento->detectado_en?->toISOString(),
+                    'detectado_en' => $evento->detectado_en->toISOString(),
                 ])
                 ->values()
                 ->all(),
