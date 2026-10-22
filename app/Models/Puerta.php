@@ -9,6 +9,7 @@ class Puerta extends Model
 {
     protected $fillable = [
         'nombre',
+        'tipo',
         'activa',
     ];
 

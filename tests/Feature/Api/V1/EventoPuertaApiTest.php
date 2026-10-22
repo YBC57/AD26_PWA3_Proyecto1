@@ -3,9 +3,11 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\DispositivoIot;
+use App\Models\EventoPuerta;
 use App\Models\Puerta;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class EventoPuertaApiTest extends TestCase
@@ -110,6 +112,55 @@ class EventoPuertaApiTest extends TestCase
         ]);
 
         $this->assertDatabaseCount('eventos_puerta', 1);
+    }
+
+    public function test_api_event_appears_first_in_the_authenticated_web_history(): void
+    {
+        $puerta = $this->crearPuerta();
+        $dispositivo = $this->crearDispositivo($puerta);
+        $token = $dispositivo->createToken('test', ['events:create']);
+
+        EventoPuerta::factory()
+            ->for($puerta)
+            ->abierta()
+            ->create([
+                'origen' => 'prueba',
+                'detectado_en' => now()->subDay(),
+            ]);
+
+        $payload = $this->payload();
+        $payload['detectado_en'] = now()->subMinute()->format('Y-m-d\TH:i:sP');
+
+        $apiResponse = $this->withToken($token->plainTextToken)
+            ->postJson($this->endpoint($puerta), $payload)
+            ->assertCreated()
+            ->assertJsonPath('data.puerta_id', $puerta->id)
+            ->assertJsonPath('data.tipo_evento', 'lectura_anomala')
+            ->assertJsonPath('data.origen', 'dispositivo_real');
+
+        $eventoId = $apiResponse->json('data.id');
+        $fechaEsperada = now()->parse($payload['detectado_en'])->utc()->toISOString();
+
+        $this->assertDatabaseHas('eventos_puerta', [
+            'id' => $eventoId,
+            'puerta_id' => $puerta->id,
+            'dispositivo_iot_id' => $dispositivo->id,
+            'tipo_evento' => 'lectura_anomala',
+            'origen' => 'dispositivo_real',
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('eventos_puerta.index', ['puerta_id' => $puerta->id]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Dashboard')
+                ->where('puertaSeleccionada.id', $puerta->id)
+                ->where('estadisticas.total', 2)
+                ->where('eventos.total', 2)
+                ->where('eventos.data.0.id', $eventoId)
+                ->where('eventos.data.0.tipo_evento', 'lectura_anomala')
+                ->where('eventos.data.0.detectado_en', $fechaEsperada)
+                ->where('ultimoEvento.id', $eventoId));
     }
 
     public function test_retransmissions_are_idempotent_and_key_reuse_with_other_payload_conflicts(): void

@@ -110,10 +110,10 @@ class EventoPuertaController extends Controller
     /**
      * @return array{
      *     id: int,
-     *     estado_puerta: string,
-     *     estado_candado: string,
+        *     estado_puerta: string|null,
+        *     estado_candado: string|null,
      *     vibracion_detectada: bool,
-     *     cantidad_vibracion: int,
+        *     cantidad_vibracion: int|null,
      *     tipo_evento: string,
      *     detectado_en: string,
      *     created_at: string|null

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onUnmounted } from 'vue';
 import { dashboard } from '@/routes';
 
 type Evento = {
     id: number;
-    estado_puerta: string;
-    estado_candado: string;
+    estado_puerta: string | null;
+    estado_candado: string | null;
     vibracion_detectada: boolean;
-    cantidad_vibracion: number;
+    cantidad_vibracion: number | null;
     tipo_evento: string;
     detectado_en: string | null;
     created_at: string | null;
@@ -89,7 +89,7 @@ const formatFecha = (valor: string | null | undefined) => {
     }).format(fecha);
 };
 
-const etiquetaPuerta = (estado: string, tipoEvento?: string) => {
+const etiquetaPuerta = (estado: string | null, tipoEvento?: string) => {
     if (tipoEvento === 'lectura_anomala')
         return 'Indeterminada (lectura anómala)';
 
@@ -101,7 +101,7 @@ const etiquetaPuerta = (estado: string, tipoEvento?: string) => {
     return mapa[estado] ?? 'Indeterminada';
 };
 
-const etiquetaCandado = (estado: string, tipoEvento?: string) => {
+const etiquetaCandado = (estado: string | null, tipoEvento?: string) => {
     if (tipoEvento === 'lectura_anomala') return 'Indeterminado';
 
     const mapa: Record<string, string> = {
@@ -141,6 +141,33 @@ const cambiarPuerta = (event: Event) => {
         { preserveState: true, preserveScroll: true },
     );
 };
+
+let cancelPollRequest: (() => void) | undefined;
+
+const eventPoll = router.poll(
+    3000,
+    {
+        only: ['eventos', 'estadisticas', 'ultimoEvento'],
+        onCancelToken: ({ cancel }) => {
+            cancelPollRequest = cancel;
+        },
+        onFinish: () => {
+            cancelPollRequest = undefined;
+        },
+    },
+    {
+        autoStart: false,
+        keepAlive: false,
+        mode: 'rest',
+    },
+);
+
+eventPoll.start();
+
+onUnmounted(() => {
+    eventPoll.destroy();
+    cancelPollRequest?.();
+});
 </script>
 
 <template>
@@ -305,7 +332,7 @@ const cambiarPuerta = (event: Event) => {
                             <th class="px-4 py-3 font-medium">Evento</th>
                             <th class="px-4 py-3 font-medium">Vibración</th>
                             <th class="px-4 py-3 font-medium">
-                                Cantidad (prueba)
+                                Activaciones
                             </th>
                             <th class="px-4 py-3 font-medium">Fecha / hora</th>
                         </tr>
@@ -351,7 +378,7 @@ const cambiarPuerta = (event: Event) => {
                                 {{ evento.vibracion_detectada ? 'Sí' : 'No' }}
                             </td>
                             <td class="px-4 py-3">
-                                {{ evento.cantidad_vibracion ?? 0 }}
+                                {{ evento.cantidad_vibracion ?? 'No disponible' }}
                             </td>
                             <td class="px-4 py-3">
                                 {{ formatFecha(evento.detectado_en) }}

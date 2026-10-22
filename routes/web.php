@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [EventoPuertaController::class, 'index'])
+        ->name('dashboard');
 
     Route::get('eventos-puerta', [EventoPuertaController::class, 'index'])
         ->name('eventos_puerta.index');
