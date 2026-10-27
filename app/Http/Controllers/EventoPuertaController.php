@@ -73,6 +73,7 @@ class EventoPuertaController extends Controller
             ->selectRaw("SUM(CASE WHEN tipo_evento = 'vibracion_suave' OR tipo_evento = 'llamado_puerta' THEN 1 ELSE 0 END) as llamados")
             ->selectRaw("SUM(CASE WHEN tipo_evento = 'intento_forzado' OR tipo_evento = 'posible_forzamiento' THEN 1 ELSE 0 END) as posibles_forzamientos")
             ->selectRaw("SUM(CASE WHEN tipo_evento = 'lectura_anomala' THEN 1 ELSE 0 END) as lecturas_anomalas")
+            ->selectRaw("SUM(CASE WHEN tipo_evento = 'vibracion_detectada' THEN 1 ELSE 0 END) as vibraciones_sin_clasificar")
             ->first()
             ?->getAttributes() ?? [];
 
@@ -101,6 +102,7 @@ class EventoPuertaController extends Controller
                 'llamados' => (int) ($atributosEstadisticas['llamados'] ?? 0),
                 'posibles_forzamientos' => (int) ($atributosEstadisticas['posibles_forzamientos'] ?? 0),
                 'lecturas_anomalas' => (int) ($atributosEstadisticas['lecturas_anomalas'] ?? 0),
+                'vibraciones_sin_clasificar' => (int) ($atributosEstadisticas['vibraciones_sin_clasificar'] ?? 0),
             ],
             'ultimoEvento' => $ultimoEvento ? $this->datosEvento($ultimoEvento) : null,
             'evento' => $evento ? $this->datosEvento($evento) : null,
@@ -110,10 +112,10 @@ class EventoPuertaController extends Controller
     /**
      * @return array{
      *     id: int,
-        *     estado_puerta: string|null,
-        *     estado_candado: string|null,
+     *     estado_puerta: string|null,
+     *     estado_candado: string|null,
      *     vibracion_detectada: bool,
-        *     cantidad_vibracion: int|null,
+     *     cantidad_vibracion: int|null,
      *     tipo_evento: string,
      *     detectado_en: string,
      *     created_at: string|null

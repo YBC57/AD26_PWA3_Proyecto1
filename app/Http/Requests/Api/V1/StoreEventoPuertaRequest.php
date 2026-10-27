@@ -40,6 +40,7 @@ class StoreEventoPuertaRequest extends FormRequest
                     'puerta_cerrada_con_seguro',
                     'llamado_puerta',
                     'posible_forzamiento',
+                    'vibracion_detectada',
                     'lectura_anomala',
                 ]),
             ],
@@ -78,6 +79,13 @@ class StoreEventoPuertaRequest extends FormRequest
 
                 if ($tipo === 'puerta_abierta' && $estadoPuerta !== 'abierta') {
                     $validator->errors()->add('estado_puerta', 'El evento requiere estado abierta.');
+                }
+
+                if ($tipo === 'vibracion_detectada' && $this->input('vibracion_detectada') !== true) {
+                    $validator->errors()->add(
+                        'vibracion_detectada',
+                        'El evento requiere que se haya detectado vibración.',
+                    );
                 }
 
                 if (

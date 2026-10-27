@@ -36,6 +36,7 @@ type Estadisticas = {
     llamados: number;
     posibles_forzamientos: number;
     lecturas_anomalas: number;
+    vibraciones_sin_clasificar: number;
 };
 
 const props = defineProps<{
@@ -71,6 +72,7 @@ const estadisticas = computed<Estadisticas>(
             llamados: 0,
             posibles_forzamientos: 0,
             lecturas_anomalas: 0,
+            vibraciones_sin_clasificar: 0,
         },
 );
 
@@ -86,6 +88,7 @@ const formatFecha = (valor: string | null | undefined) => {
     return new Intl.DateTimeFormat('es-ES', {
         dateStyle: 'medium',
         timeStyle: 'short',
+        timeZone: 'America/Mexico_City',
     }).format(fecha);
 };
 
@@ -98,7 +101,7 @@ const etiquetaPuerta = (estado: string | null, tipoEvento?: string) => {
         cerrada: 'Cerrada',
     };
 
-    return mapa[estado] ?? 'Indeterminada';
+    return mapa[estado ?? ''] ?? 'Indeterminada';
 };
 
 const etiquetaCandado = (estado: string | null, tipoEvento?: string) => {
@@ -109,7 +112,7 @@ const etiquetaCandado = (estado: string | null, tipoEvento?: string) => {
         desbloqueado: 'Sin seguro',
     };
 
-    return mapa[estado] ?? 'Indeterminado';
+    return mapa[estado ?? ''] ?? 'Indeterminado';
 };
 
 const etiquetaEvento = (tipo: string) => {
@@ -126,6 +129,7 @@ const etiquetaEvento = (tipo: string) => {
         llamado_puerta: 'Llamado o golpe suave',
         golpe_suave: 'Llamado o golpe suave',
         posible_forzamiento: 'Posible intento de forzamiento',
+        vibracion_detectada: 'Vibración detectada (sin clasificar)',
         lectura_anomala: 'Lectura anómala del sensor',
     };
 
@@ -306,6 +310,14 @@ onUnmounted(() => {
                     {{ estadisticas.vibraciones }}
                 </p>
             </div>
+            <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
+                <p class="text-sm text-muted-foreground">
+                    Vibraciones sin clasificar
+                </p>
+                <p class="mt-2 text-2xl font-bold text-foreground">
+                    {{ estadisticas.vibraciones_sin_clasificar }}
+                </p>
+            </div>
         </div>
 
         <div class="rounded-xl border border-border bg-card shadow-sm">
@@ -331,9 +343,7 @@ onUnmounted(() => {
                             <th class="px-4 py-3 font-medium">Seguro</th>
                             <th class="px-4 py-3 font-medium">Evento</th>
                             <th class="px-4 py-3 font-medium">Vibración</th>
-                            <th class="px-4 py-3 font-medium">
-                                Activaciones
-                            </th>
+                            <th class="px-4 py-3 font-medium">Activaciones</th>
                             <th class="px-4 py-3 font-medium">Fecha / hora</th>
                         </tr>
                     </thead>
@@ -348,7 +358,10 @@ onUnmounted(() => {
                                 <span
                                     class="rounded-full px-2 py-1 text-xs font-medium"
                                     :class="
-                                        evento.tipo_evento === 'lectura_anomala'
+                                        evento.tipo_evento ===
+                                            'lectura_anomala' ||
+                                        evento.tipo_evento ===
+                                            'vibracion_detectada'
                                             ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
                                             : evento.estado_puerta === 'abierta'
                                               ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
@@ -378,7 +391,9 @@ onUnmounted(() => {
                                 {{ evento.vibracion_detectada ? 'Sí' : 'No' }}
                             </td>
                             <td class="px-4 py-3">
-                                {{ evento.cantidad_vibracion ?? 'No disponible' }}
+                                {{
+                                    evento.cantidad_vibracion ?? 'No disponible'
+                                }}
                             </td>
                             <td class="px-4 py-3">
                                 {{ formatFecha(evento.detectado_en) }}

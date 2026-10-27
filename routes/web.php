@@ -19,4 +19,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('eventos_puerta.store');
 });
 
+Route::get('/prueba-json', function () {
+    return response()->json([
+        'ok' => true,
+        'mensaje' => 'Conexion con Laravel correcta',
+    ]);
+})->name('prueba.json');
+
 require __DIR__.'/settings.php';

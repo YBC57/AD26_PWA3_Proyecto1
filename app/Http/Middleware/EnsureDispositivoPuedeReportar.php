@@ -45,6 +45,8 @@ class EnsureDispositivoPuedeReportar
             ! $dispositivo
             || ! $dispositivo->activo
             || (int) $dispositivo->puerta_id !== $puerta->id
+            || ! $puerta->activa
+            || $puerta->tipo !== 'real'
             || ! $accessToken
             || $accessToken->tokenable_type !== $dispositivo->getMorphClass()
             || (int) $accessToken->tokenable_id !== $dispositivo->id

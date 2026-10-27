@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\EventoPuerta;
-use App\Models\Puerta;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -64,10 +63,6 @@ class EventoPuertaFactory extends Factory
         ]);
 
         return $escenario + [
-            'puerta_id' => Puerta::firstOrCreate(
-                ['nombre' => 'Puerta de maqueta'],
-                ['activa' => true],
-            )->id,
             'detectado_en' => fake()->dateTimeBetween('-30 days', 'now'),
         ];
     }

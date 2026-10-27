@@ -5,12 +5,19 @@ namespace Database\Seeders;
 use App\Models\Puerta;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use LogicException;
 
 class PuertaSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! Schema::hasColumn('puertas', 'tipo')) {
+            throw new LogicException(
+                'Ejecuta la migración de clasificación de puertas antes de sembrarlas.',
+            );
+        }
+
         DB::transaction(function (): void {
             $puertas = Puerta::query()
                 ->whereIn('nombre', [

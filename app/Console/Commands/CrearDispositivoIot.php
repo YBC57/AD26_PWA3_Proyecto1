@@ -17,8 +17,8 @@ class CrearDispositivoIot extends Command
     {
         $puerta = Puerta::query()->find($this->argument('puerta_id'));
 
-        if (! $puerta || ! $puerta->activa) {
-            $this->error('La puerta no existe o está inactiva.');
+        if (! $puerta || ! $puerta->activa || $puerta->tipo !== 'real') {
+            $this->error('La puerta no existe, está inactiva o no es una puerta real.');
 
             return self::FAILURE;
         }
