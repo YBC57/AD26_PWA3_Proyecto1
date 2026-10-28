@@ -433,13 +433,31 @@ class EventoPuertaApiTest extends TestCase
 
         $firstResponse = $this->withToken($token->plainTextToken)
             ->postJson($this->endpoint($puerta), $payload)
-            ->assertCreated();
+            ->assertCreated()
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'puerta_id',
+                    'tipo_evento',
+                    'origen',
+                    'detectado_en',
+                ],
+            ])
+            ->assertJsonPath('data.puerta_id', $puerta->id)
+            ->assertJsonPath('data.tipo_evento', $payload['tipo_evento'])
+            ->assertJsonPath('data.origen', 'dispositivo_real');
         $eventoId = $firstResponse->json('data.id');
+        $this->assertIsInt($eventoId);
+        $this->assertGreaterThan(0, $eventoId);
+        $this->assertArrayNotHasKey('duplicado', $firstResponse->json());
 
         $this->postJson($this->endpoint($puerta), $payload)
             ->assertOk()
             ->assertJsonPath('duplicado', true)
-            ->assertJsonPath('data.id', $eventoId);
+            ->assertJsonPath('data.id', $eventoId)
+            ->assertJsonPath('data.puerta_id', $puerta->id)
+            ->assertJsonPath('data.tipo_evento', $payload['tipo_evento'])
+            ->assertJsonPath('data.origen', 'dispositivo_real');
 
         $differentPayload = [...$payload, 'vibracion_detectada' => true];
 

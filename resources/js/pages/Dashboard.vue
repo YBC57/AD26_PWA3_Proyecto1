@@ -212,14 +212,6 @@ onUnmounted(() => {
             </label>
         </div>
 
-        <p
-            class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
-        >
-            Los registros actuales son datos de prueba; no hay sensores físicos
-            conectados. Las vibraciones no determinan por sí solas un intento de
-            forzamiento.
-        </p>
-
         <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
             <h2 class="text-sm font-semibold text-muted-foreground">
                 Último estado registrado
